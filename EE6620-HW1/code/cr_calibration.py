@@ -66,7 +66,7 @@ def loadExposures(source_dir):
     return img_list, exposure_times
 
 
-def estimateResponse(img_samples, etime_list, lambda_=55):
+def estimateResponse(img_samples, etime_list, lambda_=50):
     """Estimate camera response for bracketing images
 
     Args:
@@ -77,10 +77,10 @@ def estimateResponse(img_samples, etime_list, lambda_=55):
     
     pixel_num = img_samples.shape[1]
     image_num = img_samples.shape[0]
-    equ_num = 256 + image_num * pixel_num
+    equ_num = 256 + image_num * pixel_num + 1
     A = np.zeros((equ_num, N + pixel_num))
-    #x = np.zeros(N + pixel_num)
-    b = np.zeros(equ_num)
+    x = np.zeros(N + pixel_num)
+    b = np.zeros((equ_num, 1))
     w = np.arange(256) # weight for every intensity level
     # construct w
     for i in range(0, 256, 1):
@@ -88,16 +88,17 @@ def estimateResponse(img_samples, etime_list, lambda_=55):
             w[i] = w[i] - Z_min
         else:
             w[i] = Z_max - w[i]
-
     for i in range(0, 256, 1):
-        if i != 0 and i != 255:
+        if i == 0:
+            A[i, 127] = 1 # unit exposure assumption by letting g(127) = 0.
+        elif i != 0 and i != 255:
             # smoothness for z == i
             A[i, i-1] = lambda_ * w[i]
             A[i, i] = -2 * lambda_ * w[i]
             A[i, i+1] = lambda_ * w[i]
     k = 256
-    for i in range(0, image_num, 1):
-        for j in range(0, pixel_num, 1):
+    for j in range(0, pixel_num, 1):
+        for i in range(0, image_num, 1):
             #print(img_samples[i][j], etime_list[i])
             
             A[k, img_samples[i][j]] = w[img_samples[i][j]]
@@ -106,8 +107,8 @@ def estimateResponse(img_samples, etime_list, lambda_=55):
 
             k += 1
     x, residuals, rank, s = np.linalg.lstsq(A, b, rcond='warn')
-    return x[:256]
-
+    x = x[:256].flatten()
+    return x
 
 def constructRadiance(img_list, response, etime_list):
     """Construct irradiance map from brackting images
@@ -154,3 +155,4 @@ if __name__ == '__main__':
     etime = np.load('../ref/p1_et_samples.npy') # (16,)
     golden = np.load('../ref/p1_resp.npy') # 取前256個變數回傳. (256,) 
     resp_test = estimateResponse(samples, etime)
+    
