@@ -114,12 +114,30 @@ def constructRadiance(img_list, response, etime_list):
     """Construct irradiance map from brackting images
 
     Args:
-        img_list (ndarray (N, Y, X)): N bracketing images (1 channel)
-        response (ndarray (256,)): response mapping
-        etime_list (list of float32): list of exposure time
+        img_list (ndarray (N, Y, X)): N bracketing images (1 channel)    (16張images, 768, 512)
+        response (ndarray (256,)): response mapping    g(Zij)
+        etime_list (list of float32): list of exposure time    (16,)
     """
     dtype = np.float32
     result = np.zeros(img_list.shape[1:], dtype=dtype)
+
+    w = np.arange(256) # weight for every intensity level
+    # construct w
+    for i in range(0, 256, 1):
+        if w[i] <= MID:
+            w[i] = w[i] - Z_min
+        else:
+            w[i] = Z_max - w[i]
+
+    for image_i in range(0, img_list.shape[1], 1):
+        for image_j in range(0, img_list.shape[2], 1):
+            num1 = 0
+            num2 = 0
+            for j in range(0, img_list.shape[0], 1):
+                num1 = num1 + w[img_list[j][image_i][image_j]]*(response[img_list[j][image_i][image_j]] - np.log(etime_list[j]))
+                num2 = num2 + w[img_list[j][image_i][image_j]]
+            result[image_i][image_j] = num1 / num2
+    result = np.exp(result)
     return result
 
 
@@ -146,6 +164,7 @@ if __name__ == '__main__':
     list your develop log or experiments for cr calibration here
     """
     print('cr_calibration')
+    '''
     # Example matrix Ax = b for image samples(/ref/p1_pixel_samples.npy) and exposure times (/ref/p1_etimes.npy).
     # These two matrix should generate same response result as in test_HW1.test_estimateResponse()
     example_A = np.load('../ref/p1_A.npy')
@@ -155,4 +174,11 @@ if __name__ == '__main__':
     etime = np.load('../ref/p1_et_samples.npy') # (16,)
     golden = np.load('../ref/p1_resp.npy') # 取前256個變數回傳. (256,) 
     resp_test = estimateResponse(samples, etime)
+    '''
+    golden = np.load('../ref/p1_rad.npy')
+    cimg_list = np.load('../ref/p1_cimg.npy')
+    etime = np.load('../ref/p1_et_samples.npy')
+    resp = np.load('../ref/p1_resp.npy')
+    rad_test = constructRadiance(cimg_list, resp, etime)
+    mse = np.mean((golden - rad_test)**2)
     
