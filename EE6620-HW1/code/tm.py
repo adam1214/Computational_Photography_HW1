@@ -1,6 +1,8 @@
 # Functions for tone mapping
 # Put all your related functions for section 1-2~1-5 in this file.
 import numpy as np
+import cv2 as cv
+import math
 gamma = 2.2
 
 
@@ -12,6 +14,31 @@ def globalTM(src, scale=1.0):
         scale (float, optional): scaling factor (Defaults to 1.0)
     """
     result = np.zeros_like(src, dtype=np.uint8)
+    
+    # find max_rad in each channel
+    max_rad = [-1,-1,-1]
+    for channel in range(0, result.shape[2], 1):
+        for i in range(0, result.shape[0], 1):
+            for j in range(0, result.shape[1], 1):
+                if max_rad[channel] < src[i][j][channel]:
+                    max_rad[channel] = src[i][j][channel]
+
+    for channel in range(0, result.shape[2], 1):
+        for i in range(0, result.shape[0], 1):
+            for j in range(0, result.shape[1], 1):
+                try:
+                    adjustment = scale*(math.log(src[i][j][channel],2)-math.log(max_rad[channel],2))+math.log(max_rad[channel],2)
+                except:
+                    adjustment = scale*(-10000000-math.log(max_rad[channel],2))+math.log(max_rad[channel],2)
+                compressed_result = math.pow(2, adjustment)
+                gamma_correction = math.pow(compressed_result, 1/gamma)
+                gamma_correction = gamma_correction * 255
+                if gamma_correction > 255:
+                    gamma_correction = 255
+                elif gamma_correction < 0:
+                    gamma_correction = 0
+                result[i][j][channel] = gamma_correction
+    
     return result
 
 
@@ -77,3 +104,7 @@ if __name__ == '__main__':
     list your develop log or experiments for tone mapping here
     """
     print('tone mapping')
+    radiance = cv.imread('../TestImg/memorial.hdr', -1)
+    golden = cv.imread('../ref/p2_gtm.png')
+    ldr = globalTM(radiance, scale=1.0)
+    psnr = cv.PSNR(golden, ldr)

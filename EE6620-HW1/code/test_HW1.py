@@ -16,7 +16,7 @@ class TestHW1(unittest.TestCase):
         mse = np.mean((golden - resp_test)**2)
         self.assertLessEqual(mse, 0.1)
         return mse
-    '''
+    
     def test_constructRadiance(self):
         golden = np.load('../ref/p1_rad.npy')
         cimg_list = np.load('../ref/p1_cimg.npy')
@@ -34,7 +34,7 @@ class TestHW1(unittest.TestCase):
         psnr = cv.PSNR(golden, ldr)
         self.assertGreaterEqual(psnr, 45)
         return psnr
-
+    '''
     def test_localTMgaussian(self):
         radiance = cv.imread('../TestImg/vinesunset.hdr', -1)
         golden = cv.imread('../ref/p3_ltm.png')
