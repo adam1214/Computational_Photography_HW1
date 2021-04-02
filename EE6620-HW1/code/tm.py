@@ -3,6 +3,8 @@
 import numpy as np
 import cv2 as cv
 import math
+import sys
+from functools import partial
 gamma = 2.2
 
 
@@ -50,6 +52,7 @@ def localTM(src, imgFilter, scale=3):
         imgFilter (function): filter function with preset parameters
         scale (float, optional): scaling factor (Defaults to 3)
     """
+    #imgFilter(src)
     result = np.zeros_like(src, dtype=np.uint8)
     return result
 
@@ -67,8 +70,33 @@ def gaussianFilter(src, N=35, sigma_s=100):
     assert N % 2
     dtype = np.float32
     result = np.zeros_like(src, dtype=dtype)
+    try:
+        I = (src[:,:,0] + src[:,:,1] + src[:,:,2])/3
+        L = np.zeros(I.shape)
+        for i in range(0, I.shape[0], 1):
+            for j in range(0, I.shape[1], 1):
+                try:
+                    L[i][j] = math.log(I[i][j], 2)
+                except:
+                    L[i][j] = sys.float_info.min
+    except:
+        I = src
+        L = I
+    # Pad the Image, Assume Square filter
+    pdsize = int(N/2)
+    padded = np.pad(L, ((pdsize, pdsize), (pdsize, pdsize)), 'symmetric')
+    for i in range(2, padded.shape[0] - 2, 1):
+        for j in range(2, padded.shape[1] - 2, 1):
+            num1 = 0
+            num2 = 0
+            for window_k in range(i - pdsize, i + pdsize + 1, 1):
+                for window_l in range(j - pdsize, j + pdsize + 1, 1):
+                    w = math.exp(-((i-window_k)**2+(j-window_l)**2)/(2*sigma_s**2))
+                    num2 += w
+                    num1 = num1 + padded[window_k][window_l] * w
+            result[i-2][j-2] = num1/num2
     return result
-
+    
 
 def bilateralFilter(src, N=35, sigma_s=100, sigma_r=0.8):
     """Bilateral filter (section 1-4)
@@ -104,7 +132,21 @@ if __name__ == '__main__':
     list your develop log or experiments for tone mapping here
     """
     print('tone mapping')
+    '''
     radiance = cv.imread('../TestImg/memorial.hdr', -1)
     golden = cv.imread('../ref/p2_gtm.png')
     ldr = globalTM(radiance, scale=1.0)
     psnr = cv.PSNR(golden, ldr)
+    '''
+    impulse = np.load('../ref/p3_impulse.npy')
+    golden = np.load('../ref/p3_gaussian.npy').astype(float)
+    test = gaussianFilter(impulse, 5, 15).astype(float)
+    psnr = cv.PSNR(golden, test)
+    '''
+    radiance = cv.imread('../TestImg/vinesunset.hdr', -1)
+    golden = cv.imread('../ref/p3_ltm.png')
+    gauhw1 = partial(gaussianFilter, N=35, sigma_s=100)
+    test = localTM(radiance, gauhw1, scale=3)
+    psnr = cv.PSNR(golden, test)
+    '''
+    

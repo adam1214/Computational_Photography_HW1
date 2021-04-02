@@ -26,7 +26,7 @@ class TestHW1(unittest.TestCase):
         mse = np.mean((golden - rad_test)**2)
         self.assertLessEqual(mse, 0.01)
         return mse
-    '''
+
     def test_globalTM(self):
         radiance = cv.imread('../TestImg/memorial.hdr', -1)
         golden = cv.imread('../ref/p2_gtm.png')
@@ -34,7 +34,7 @@ class TestHW1(unittest.TestCase):
         psnr = cv.PSNR(golden, ldr)
         self.assertGreaterEqual(psnr, 45)
         return psnr
-    '''
+    
     def test_localTMgaussian(self):
         radiance = cv.imread('../TestImg/vinesunset.hdr', -1)
         golden = cv.imread('../ref/p3_ltm.png')
@@ -43,7 +43,7 @@ class TestHW1(unittest.TestCase):
         psnr = cv.PSNR(golden, test)
         self.assertGreaterEqual(psnr, 45)
         return psnr
-
+    '''
     def test_gaussian(self):
         impulse = np.load('../ref/p3_impulse.npy')
         golden = np.load('../ref/p3_gaussian.npy').astype(float)
@@ -51,7 +51,7 @@ class TestHW1(unittest.TestCase):
         psnr = cv.PSNR(golden, test)
         self.assertGreaterEqual(psnr, 60)
         return psnr
-
+    '''
     def test_localTMbilateral(self):
         radiance = np.load('../ref/p4_imgpatch.npy')
         golden = cv.imread('../ref/p4_ltm_patch.png')
