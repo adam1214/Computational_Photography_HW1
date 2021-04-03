@@ -34,7 +34,7 @@ class TestHW1(unittest.TestCase):
         psnr = cv.PSNR(golden, ldr)
         self.assertGreaterEqual(psnr, 45)
         return psnr
-    
+    '''
     def test_localTMgaussian(self):
         radiance = cv.imread('../TestImg/vinesunset.hdr', -1)
         golden = cv.imread('../ref/p3_ltm.png')
@@ -43,7 +43,7 @@ class TestHW1(unittest.TestCase):
         psnr = cv.PSNR(golden, test)
         self.assertGreaterEqual(psnr, 45)
         return psnr
-    '''
+    
     def test_gaussian(self):
         impulse = np.load('../ref/p3_impulse.npy')
         golden = np.load('../ref/p3_gaussian.npy').astype(float)
