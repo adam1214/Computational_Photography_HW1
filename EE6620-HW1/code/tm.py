@@ -52,7 +52,7 @@ def localTM(src, imgFilter, scale=3):
         imgFilter (function): filter function with preset parameters
         scale (float, optional): scaling factor (Defaults to 3)
     """
-    #imgFilter(src)
+    LB = imgFilter(src)
     result = np.zeros_like(src, dtype=np.uint8)
     return result
 
@@ -69,9 +69,11 @@ def gaussianFilter(src, N=35, sigma_s=100):
     # Window size should be odd
     assert N % 2
     dtype = np.float32
-    result = np.zeros_like(src, dtype=dtype)
     try:
         I = (src[:,:,0] + src[:,:,1] + src[:,:,2])/3
+        result = np.zeros_like(I, dtype=dtype)
+        print(I.shape)
+        print(result.shape)
         L = np.zeros(I.shape)
         for i in range(0, I.shape[0], 1):
             for j in range(0, I.shape[1], 1):
@@ -80,13 +82,14 @@ def gaussianFilter(src, N=35, sigma_s=100):
                 except:
                     L[i][j] = sys.float_info.min
     except:
+        result = np.zeros_like(src, dtype=dtype)
         I = src
         L = I
     # Pad the Image, Assume Square filter
     pdsize = int(N/2)
     padded = np.pad(L, ((pdsize, pdsize), (pdsize, pdsize)), 'symmetric')
-    for i in range(2, padded.shape[0] - 2, 1):
-        for j in range(2, padded.shape[1] - 2, 1):
+    for i in range(pdsize, padded.shape[0] - pdsize, 1):
+        for j in range(pdsize, padded.shape[1] - pdsize, 1):
             num1 = 0
             num2 = 0
             for window_k in range(i - pdsize, i + pdsize + 1, 1):
@@ -94,7 +97,7 @@ def gaussianFilter(src, N=35, sigma_s=100):
                     w = math.exp(-((i-window_k)**2+(j-window_l)**2)/(2*sigma_s**2))
                     num2 += w
                     num1 = num1 + padded[window_k][window_l] * w
-            result[i-2][j-2] = num1/num2
+            result[i-pdsize][j-pdsize] = num1/num2
     return result
     
 
@@ -137,7 +140,7 @@ if __name__ == '__main__':
     golden = cv.imread('../ref/p2_gtm.png')
     ldr = globalTM(radiance, scale=1.0)
     psnr = cv.PSNR(golden, ldr)
-    '''
+
     impulse = np.load('../ref/p3_impulse.npy')
     golden = np.load('../ref/p3_gaussian.npy').astype(float)
     test = gaussianFilter(impulse, 5, 15).astype(float)
@@ -148,5 +151,4 @@ if __name__ == '__main__':
     gauhw1 = partial(gaussianFilter, N=35, sigma_s=100)
     test = localTM(radiance, gauhw1, scale=3)
     psnr = cv.PSNR(golden, test)
-    '''
     
