@@ -7,7 +7,7 @@ from tm import globalTM, localTM, gaussianFilter, bilateralFilter, whiteBalance
 
 
 class TestHW1(unittest.TestCase):
-    '''
+    
     def test_estimateResponse(self):
         samples = np.load('../ref/p1_pixel_samples.npy')
         etime = np.load('../ref/p1_et_samples.npy')
@@ -34,7 +34,7 @@ class TestHW1(unittest.TestCase):
         psnr = cv.PSNR(golden, ldr)
         self.assertGreaterEqual(psnr, 45)
         return psnr
-    '''
+    
     def test_localTMgaussian(self):
         radiance = cv.imread('../TestImg/vinesunset.hdr', -1)
         golden = cv.imread('../ref/p3_ltm.png')
@@ -51,7 +51,7 @@ class TestHW1(unittest.TestCase):
         psnr = cv.PSNR(golden, test)
         self.assertGreaterEqual(psnr, 60)
         return psnr
-    '''
+    
     def test_localTMbilateral(self):
         radiance = np.load('../ref/p4_imgpatch.npy')
         golden = cv.imread('../ref/p4_ltm_patch.png')
@@ -60,7 +60,7 @@ class TestHW1(unittest.TestCase):
         psnr = cv.PSNR(golden, test)
         self.assertGreaterEqual(psnr, 45)
         return psnr
-
+    
     def test_bilateral(self):
         step = np.load('../ref/p4_step.npy')
         golden = np.load('../ref/p4_bilateral.npy').astype(float)
@@ -68,7 +68,7 @@ class TestHW1(unittest.TestCase):
         psnr = cv.PSNR(golden, test)
         self.assertGreaterEqual(psnr, 60)
         return psnr
-
+    '''
     def test_whiteBalance(self):
         img = np.random.rand(30, 30, 3)
         ktbw = (slice(0, 15), slice(0, 15))
