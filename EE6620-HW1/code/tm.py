@@ -183,10 +183,10 @@ def whiteBalance(src, y_range, x_range):
         y_range (tuple of 2): location range in y-dimension
         x_range (tuple of 2): location range in x-dimension
     """
-    
-    B_avg = src[x_range[0]:x_range[1], y_range[0]:y_range[1], 0].mean()
-    G_avg = src[x_range[0]:x_range[1], y_range[0]:y_range[1], 1].mean()
-    R_avg = src[x_range[0]:x_range[1], y_range[0]:y_range[1], 2].mean()
+
+    B_avg = src[y_range[0]:y_range[1], x_range[0]:x_range[1], 0].mean()
+    G_avg = src[y_range[0]:y_range[1], x_range[0]:x_range[1], 1].mean()
+    R_avg = src[y_range[0]:y_range[1], x_range[0]:x_range[1], 2].mean()
     
     src[:,:,0] = src[:,:,0]*(R_avg/B_avg)
     src[:,:,1] = src[:,:,1]*(R_avg/G_avg)
@@ -220,9 +220,15 @@ if __name__ == '__main__':
     golden = np.load('../ref/p4_bilateral.npy').astype(float)
     test = bilateralFilter(step, 9, 50, 10).astype(float)
     psnr = cv.PSNR(golden, test)
-    '''
+    
     img = np.random.rand(30, 30, 3)
     ktbw = (slice(0, 15), slice(0, 15)) # known to be white
     w_avg = img[0:15, 0:15, 2].mean() # 取Red channel 的左上 15*15 個pixels，再取平均
     wb_result = whiteBalance(img, (0, 15), (0, 15))
     result_avg = wb_result[ktbw].mean(axis=(0, 1))
+    '''
+    radiance = cv.imread('../TestImg/memorial.hdr', -1)
+    golden = cv.imread('../ref/p5_wb_gtm.png')
+    wb_hdr = whiteBalance(radiance, (457, 481), (400, 412))
+    test = globalTM(wb_hdr)
+    psnr = cv.PSNR(golden, test)

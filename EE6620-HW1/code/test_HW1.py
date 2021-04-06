@@ -77,7 +77,7 @@ class TestHW1(unittest.TestCase):
         result_avg = wb_result[ktbw].mean(axis=(0, 1))
         self.assertAlmostEqual(result_avg[0], w_avg)
         self.assertAlmostEqual(result_avg[1], w_avg)
-    '''
+    
     def test_globalTMwb(self):
         radiance = cv.imread('../TestImg/memorial.hdr', -1)
         golden = cv.imread('../ref/p5_wb_gtm.png')
@@ -86,7 +86,7 @@ class TestHW1(unittest.TestCase):
         psnr = cv.PSNR(golden, test)
         self.assertGreaterEqual(psnr, 45)
         return psnr
-    '''
+    
 
 if __name__ == '__main__':
     unittest.main()
