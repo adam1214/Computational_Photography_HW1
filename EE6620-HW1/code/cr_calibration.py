@@ -4,6 +4,7 @@
 import os
 import cv2 as cv
 import numpy as np
+import matplotlib.pyplot as plt
 
 N = 256  # intensity levels
 Z_max = 255
@@ -149,13 +150,13 @@ def pixelSample(img_list):
 
 def wholeFlow(src_path, lambda_):
     img_list, exposure_times = loadExposures(src_path)
+    # img_list(16, 768, 512, 3)(uint8):16張照片，每張照片768*512，3 channels
+    # exposure_times(list):16張照片的曝光時間
     radiance = np.zeros_like(img_list[0], dtype=np.float32)
-    pixel_samples = pixelSample(img_list)
+    pixel_samples = pixelSample(img_list) #(16, 96, 3)(uint8) 每64個pixel做一次採樣，三個channel都採樣一樣的pixel
     for ch in range(3):
-        response = estimateResponse(
-            pixel_samples[..., ch], exposure_times, lambda_)
-        radiance[..., ch] = constructRadiance(
-            img_list[..., ch], response, exposure_times)
+        response = estimateResponse(pixel_samples[..., ch], exposure_times, lambda_)
+        radiance[..., ch] = constructRadiance(img_list[..., ch], response, exposure_times)
     return radiance
 
 
@@ -174,11 +175,39 @@ if __name__ == '__main__':
     etime = np.load('../ref/p1_et_samples.npy') # (16,)
     golden = np.load('../ref/p1_resp.npy') # 取前256個變數回傳. (256,) 
     resp_test = estimateResponse(samples, etime)
-    '''
+    
     golden = np.load('../ref/p1_rad.npy')
     cimg_list = np.load('../ref/p1_cimg.npy')
     etime = np.load('../ref/p1_et_samples.npy')
     resp = np.load('../ref/p1_resp.npy')
     rad_test = constructRadiance(cimg_list, resp, etime)
     mse = np.mean((golden - rad_test)**2)
-    
+    '''
+
+    src_path = '../TestImg/memorial/'
+    lambda_ = 50
+    img_list, exposure_times = loadExposures(src_path)
+    # img_list(16, 768, 512, 3)(uint8):16張照片，每張照片768*512，3 channels
+    # exposure_times(list):16張照片的曝光時間
+    radiance = np.zeros_like(img_list[0], dtype=np.float32)
+    pixel_samples = pixelSample(img_list) #(16, 96, 3)(uint8) 每64個pixel做一次採樣，三個channel都採樣一樣的pixel
+    for channel in range(3):
+        plt.figure() # construct Input pixels graph
+        color_list = ['k', 'r', 'peru', 'g', 'm', 'orange', 'gray']
+        for pixel in range(0, pixel_samples[..., channel].shape[1], 1): # pixel_samples[..., channel].shape = (16, 96), pixel_samples[..., ch][:, pixel].shape = (16,) 
+            plt.plot(np.log(np.array(exposure_times)), pixel_samples[..., channel][:, pixel], 'o-', color = color_list[pixel%len(color_list)])
+        title = 'Input pixels for Channel ' + str(channel + 1)
+        plt.title(title)
+        plt.xlabel("Exposure time lnt")
+        plt.ylabel("Pixel Value Z")
+        plt.savefig('../Experiments/a/' + title)
+
+        plt.figure() # construct Estimated Response graph
+        response = estimateResponse(pixel_samples[..., channel], exposure_times, lambda_)
+        plt.plot(response, np.arange(256), 'o-', color = 'r')
+        title = 'Estimated Response for Channel ' + str(channel + 1)
+        plt.title(title)
+        plt.xlabel("Camera Response g(z)")
+        plt.ylabel("Pixel Value z")
+        plt.savefig('../Experiments/a/' + title)
+        plt.show()
