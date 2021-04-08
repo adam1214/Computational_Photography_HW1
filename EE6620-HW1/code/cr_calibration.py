@@ -107,6 +107,8 @@ def estimateResponse(img_samples, etime_list, lambda_=50):
             b[k] = w[img_samples[i][j]] * np.log(etime_list[i])
 
             k += 1
+    np.save('../result/p1_A.npy', A)
+    np.save('../result/p1_b.npy', b)
     x, residuals, rank, s = np.linalg.lstsq(A, b, rcond='warn')
     x = x[:256].flatten()
     return x
@@ -165,7 +167,7 @@ if __name__ == '__main__':
     list your develop log or experiments for cr calibration here
     """
     print('cr_calibration')
-    '''
+    
     # Example matrix Ax = b for image samples(/ref/p1_pixel_samples.npy) and exposure times (/ref/p1_etimes.npy).
     # These two matrix should generate same response result as in test_HW1.test_estimateResponse()
     example_A = np.load('../ref/p1_A.npy')
@@ -175,14 +177,17 @@ if __name__ == '__main__':
     etime = np.load('../ref/p1_et_samples.npy') # (16,)
     golden = np.load('../ref/p1_resp.npy') # 取前256個變數回傳. (256,) 
     resp_test = estimateResponse(samples, etime)
+    np.save('../result/p1_resp.npy', resp_test)
     
     golden = np.load('../ref/p1_rad.npy')
     cimg_list = np.load('../ref/p1_cimg.npy')
     etime = np.load('../ref/p1_et_samples.npy')
     resp = np.load('../ref/p1_resp.npy')
     rad_test = constructRadiance(cimg_list, resp, etime)
+    np.save('../result/p1_rad.npy', rad_test)
     mse = np.mean((golden - rad_test)**2)
-    '''
+
+    ########################################################################################################
 
     src_path = '../TestImg/memorial/'
     lambda_ = 50

@@ -199,36 +199,55 @@ if __name__ == '__main__':
     list your develop log or experiments for tone mapping here
     """
     print('tone mapping')
-    '''
+    
     radiance = cv.imread('../TestImg/memorial.hdr', -1)
     golden = cv.imread('../ref/p2_gtm.png')
     ldr = globalTM(radiance, scale=1.0)
+    cv.imwrite('../result/p2_gtm.png', ldr)
     psnr = cv.PSNR(golden, ldr)
 
     impulse = np.load('../ref/p3_impulse.npy')
     golden = np.load('../ref/p3_gaussian.npy').astype(float)
     test = gaussianFilter(impulse, 5, 15).astype(float)
+    np.save('../result/p3_gaussian.npy', test)
     psnr = cv.PSNR(golden, test)
 
     radiance = cv.imread('../TestImg/vinesunset.hdr', -1)
     golden = cv.imread('../ref/p3_ltm.png')
     gauhw1 = partial(gaussianFilter, N=35, sigma_s=100)
     test = localTM(radiance, gauhw1, scale=3)
+    cv.imwrite('../result/p3_ltm.png', test)
     psnr = cv.PSNR(golden, test)
     
     step = np.load('../ref/p4_step.npy')
     golden = np.load('../ref/p4_bilateral.npy').astype(float)
     test = bilateralFilter(step, 9, 50, 10).astype(float)
+    np.save('../result/p4_bilateral.npy', test)
     psnr = cv.PSNR(golden, test)
+
+    radiance = np.load('../ref/p4_imgpatch.npy')
+    golden = cv.imread('../ref/p4_ltm_patch.png')
+    bilhw1 = partial(bilateralFilter, N=35, sigma_s=100, sigma_r=0.8)
+    test = localTM(radiance, bilhw1, scale=3)
+    cv.imwrite('../result/p4_ltm_patch.png', test)
+    psnr = cv.PSNR(golden, test)
+
+    radiance = cv.imread('../TestImg/vinesunset.hdr', -1)
+    golden = cv.imread('../ref/p4_ltm.png')
+    bilhw1 = partial(bilateralFilter, N=35, sigma_s=100, sigma_r=0.8)
+    test = localTM(radiance, bilhw1, scale=3)
+    cv.imwrite('../result/p4_ltm.png', test) 
+    psnr_localTMbilateral = cv.PSNR(golden, test)
     
     img = np.random.rand(30, 30, 3)
     ktbw = (slice(0, 15), slice(0, 15)) # known to be white
     w_avg = img[0:15, 0:15, 2].mean() # 取Red channel 的左上 15*15 個pixels，再取平均
     wb_result = whiteBalance(img, (0, 15), (0, 15))
     result_avg = wb_result[ktbw].mean(axis=(0, 1))
-    '''
+    
     radiance = cv.imread('../TestImg/memorial.hdr', -1)
     golden = cv.imread('../ref/p5_wb_gtm.png')
     wb_hdr = whiteBalance(radiance, (457, 481), (400, 412))
     test = globalTM(wb_hdr)
+    cv.imwrite('../result/p5_wb_gtm.png', test)
     psnr = cv.PSNR(golden, test)
