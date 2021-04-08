@@ -199,7 +199,7 @@ if __name__ == '__main__':
         title = 'Input pixels for Channel ' + str(channel + 1)
         plt.title(title)
         plt.xlabel("Exposure time lnt")
-        plt.ylabel("Pixel Value Z")
+        plt.ylabel("Pixel Value")
         plt.savefig('../Experiments/a/' + title)
 
         plt.figure() # construct Estimated Response graph
@@ -208,6 +208,6 @@ if __name__ == '__main__':
         title = 'Estimated Response for Channel ' + str(channel + 1)
         plt.title(title)
         plt.xlabel("Camera Response g(z)")
-        plt.ylabel("Pixel Value z")
+        plt.ylabel("Pixel Value")
         plt.savefig('../Experiments/a/' + title)
         plt.show()
