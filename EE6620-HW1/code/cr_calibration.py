@@ -139,7 +139,10 @@ def constructRadiance(img_list, response, etime_list):
             for j in range(0, img_list.shape[0], 1):
                 num1 = num1 + w[img_list[j][image_i][image_j]]*(response[img_list[j][image_i][image_j]] - np.log(etime_list[j]))
                 num2 = num2 + w[img_list[j][image_i][image_j]]
-            result[image_i][image_j] = num1 / num2
+            if num2 != 0:
+                result[image_i][image_j] = num1 / num2
+            else:
+                result[image_i][image_j] = 0
     result = np.exp(result)
     return result
 
@@ -205,7 +208,7 @@ if __name__ == '__main__':
         plt.title(title)
         plt.xlabel("Exposure time lnt")
         plt.ylabel("Pixel Value")
-        plt.savefig('../Experiments/a/' + title)
+        plt.savefig('../result/Experiments/a/' + title)
 
         plt.figure() # construct Estimated Response graph
         response = estimateResponse(pixel_samples[..., channel], exposure_times, lambda_)
@@ -214,5 +217,6 @@ if __name__ == '__main__':
         plt.title(title)
         plt.xlabel("Camera Response g(z)")
         plt.ylabel("Pixel Value")
-        plt.savefig('../Experiments/a/' + title)
+        plt.savefig('../result/Experiments/a/' + title)
         plt.show()
+    

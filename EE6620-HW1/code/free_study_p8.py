@@ -54,7 +54,7 @@ golden = cv.imread('../ref/p5_wb_gtm.png')
 wb_hdr = whiteBalance(radiance, (457, 481), (400, 412))
 test = globalTM(wb_hdr)
 psnr = cv.PSNR(golden, test)
-cv.imwrite('../Free_Study/problem_8/p5_wb_gtm.png', test)
+cv.imwrite('../result/Free_Study/problem_8/p5_wb_gtm.png', test)
 print('PSNR of whiteBalance -> global tone mapping:', psnr)
 
 radiance = cv.imread('../TestImg/memorial.hdr', -1)
@@ -66,5 +66,5 @@ for channel in range(0, wb_hdr.shape[2], 1):
         for j in range(0, wb_hdr.shape[1], 1):
             wb_hdr[i][j][channel] = gamma_correction_fun(wb_hdr[i][j][channel], 2.2)
 psnr = cv.PSNR(golden, wb_hdr.astype('uint8'))
-cv.imwrite('../Free_Study/problem_8/p5_gtm_wb.png', wb_hdr)
+cv.imwrite('../result/Free_Study/problem_8/p5_gtm_wb.png', wb_hdr)
 print('PSNR of global tone mapping -> whiteBalance:', psnr)
